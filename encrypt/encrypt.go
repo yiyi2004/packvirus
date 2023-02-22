@@ -15,7 +15,7 @@ func init() {
 	EncryptFunctions["aes"] = EncryptAES
 
 	DecryptFunctions = make(map[string]func(data []byte, key []byte) ([]byte, error))
-	EncryptFunctions["aes"] = DecryptAES
+	DecryptFunctions["aes"] = DecryptAES
 }
 
 func CheckError(err error) {
