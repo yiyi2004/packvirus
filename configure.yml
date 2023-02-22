@@ -1,0 +1,4 @@
+model_path: "C:\\Users\\zhang\\workspace\\vscode\\python\\packvirus\\model\\model.pb"
+payload_path: "C:\\Users\\zhang\\workspace\\packvirus\\virus\\rev.bs64"
+key: "1100110011001100"
+algorithm: "aes"
