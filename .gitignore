@@ -1,0 +1,11 @@
+/src/github.com/
+/src/__init__.py
+/src/test
+/src/tmp
+/src/venv
+/model/*.py
+/template/*.template
+/pkg/
+/bin/
+/src/.idea/
+/.idea
