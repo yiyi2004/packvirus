@@ -13,9 +13,6 @@ type Config struct {
 }
 
 func LoadConfig(path string) (*Config, error) {
-	// 判断是否是 path
-	// 用 yaml 加载配置文件并返回
-
 	var config Config
 	configFile, err := os.ReadFile(path)
 	if err != nil {

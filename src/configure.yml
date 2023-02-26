@@ -1,6 +1,6 @@
-model_path: "C:\\Users\\zhang\\juypter_notebook_workplace\\model"
+model_path: "C:\\Users\\zhang\\workspace\\packvirus\\src\\model\\mnist_2"
 payload_path: "C:\\Users\\zhang\\workspace\\packvirus\\src\\virus\\rev.bs64"
-key: "1100110011001100"
+key: "0100010001000100"
 algorithm: "aes"
 # 校验和
 

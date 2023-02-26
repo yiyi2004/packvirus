@@ -139,11 +139,10 @@ n_images = 5
 test_images = x_test[:n_images]
 predictions = conv_net(test_images)
 
-tf.keras.models.save_model(conv_net, "../tmp/model")
+tf.saved_model.save(conv_net, "./mnist_2")
 
 # Display image and model prediction.
 for i in range(n_images):
     plt.imshow(np.reshape(test_images[i], [28, 28]), cmap='gray')
     plt.show()
     print("Model prediction: %i" % np.argmax(predictions.numpy()[i]))
-
