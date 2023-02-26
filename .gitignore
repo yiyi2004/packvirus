@@ -4,7 +4,6 @@
 /src/tmp
 /src/venv
 /model/*.py
-/template/*.template
 /pkg/
 /bin/
 /src/.idea/
